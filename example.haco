@@ -1,0 +1,29 @@
+# -*- mode: ruby -*-
+Haconiwa.define do |config|
+  config.name = "haco_example"
+  config.init_command = "/bin/bash"
+  root = Pathname.new("/home/weathare/workspace/haco_example")
+  config.chroot_to root
+
+  config.bootstrap do |b|
+    b.strategy = "lxc"
+    b.os_type  = "alpine"
+  end
+  config.provision do |p|
+    p.run_shell <<-SHELL
+apk add --update bash
+    SHELL
+  end
+
+  config.add_mount_point "tmpfs", to: root.join("tmp"), fs: "tmpfs"
+  config.mount_network_etc(root, host_root: "/etc")
+  config.mount_independent "procfs"
+  config.mount_independent "sysfs"
+  config.mount_independent "devtmpfs"
+  config.mount_independent "devpts"
+  config.mount_independent "shm"
+  config.namespace.unshare "mount"
+  config.namespace.unshare "ipc"
+  config.namespace.unshare "uts"
+  config.namespace.unshare "pid"
+end
